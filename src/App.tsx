@@ -8,7 +8,8 @@ import {
 } from '@expo-google-fonts/poppins'
 import AppLoading from 'expo-app-loading'
 
-import { Dashboard } from './screens/Dashboard'
+// import { Dashboard } from './screens/Dashboard'
+import { Register } from './screens/Register'
 import theme from './global/styles/theme'
 
 export function App() {
@@ -24,7 +25,7 @@ export function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Dashboard />
+      <Register />
     </ThemeProvider>
   )
 }

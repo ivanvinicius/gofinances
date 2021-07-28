@@ -7,6 +7,7 @@ export default {
     shape: '#FFFFFF',
     title: '#363F5F',
     text: '#969CB3',
+    border: '#e3e3e3',
     // background: '#F0F2F5',
     background: '#ebe8e8',
 
