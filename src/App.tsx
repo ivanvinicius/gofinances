@@ -1,4 +1,5 @@
 import React from 'react'
+import { StatusBar } from 'expo-status-bar'
 import { ThemeProvider } from 'styled-components'
 import {
   useFonts,
@@ -9,7 +10,8 @@ import {
 import AppLoading from 'expo-app-loading'
 
 // import { Dashboard } from './screens/Dashboard'
-import { Register } from './screens/Register'
+// import { Register } from './screens/Register'
+import { Category } from './screens/Category'
 import theme from './global/styles/theme'
 
 export function App() {
@@ -25,7 +27,8 @@ export function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Register />
+      <StatusBar style="light" translucent />
+      <Category />
     </ThemeProvider>
   )
 }
