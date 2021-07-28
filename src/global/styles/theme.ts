@@ -7,7 +7,8 @@ export default {
     shape: '#FFFFFF',
     title: '#363F5F',
     text: '#969CB3',
-    background: '#F0F2F5',
+    // background: '#F0F2F5',
+    background: '#ebe8e8',
 
     secondary_light: 'rgba(255,135,44, 0.3)',
     success_light: 'rgba(18, 164, 84, 0.5)',
