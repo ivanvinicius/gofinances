@@ -44,7 +44,8 @@
       //     }
       //   }
       // ],
-            
+      
+      "react/display-name": "off",
       "camelcase": "off",
       "react/prop-types": "off",
       "prettier/prettier": "error",

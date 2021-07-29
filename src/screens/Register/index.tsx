@@ -35,6 +35,7 @@ const schema = Y.object().shape({
   amount: Y.number()
     .positive('Apenas valores positivos')
     .typeError('Informe um valor númerico')
+    .required('Informe o valor da transação')
 })
 
 export function Register() {

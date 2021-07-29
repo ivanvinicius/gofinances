@@ -1,15 +1,15 @@
 import React from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { ThemeProvider } from 'styled-components'
+import AppLoading from 'expo-app-loading'
 import {
   useFonts,
   Poppins_700Bold,
   Poppins_500Medium,
   Poppins_400Regular
 } from '@expo-google-fonts/poppins'
-import AppLoading from 'expo-app-loading'
 
-import { Register } from './screens/Register'
+import { Routes } from './routes'
 import theme from './global/styles/theme'
 
 export function App() {
@@ -26,7 +26,7 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <StatusBar style="light" translucent />
-      <Register />
+      <Routes />
     </ThemeProvider>
   )
 }
