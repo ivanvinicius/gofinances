@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
 import { Modal, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
 import { useForm } from 'react-hook-form'
+import { useNavigation } from '@react-navigation/native'
 import * as Y from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
+import Storage from '@react-native-async-storage/async-storage'
+import uuid from 'react-native-uuid'
 
 import { Button } from '../../components/Form/Button'
 import { ControlledInput } from '../../components/Form/ControlledInput'
@@ -25,8 +28,10 @@ interface IFormProps {
 }
 
 interface IFormDataProps extends IFormProps {
+  id: string
   transactionType: 'income' | 'outcome'
   category: string
+  date: Date
 }
 
 const schema = Y.object().shape({
@@ -38,18 +43,22 @@ const schema = Y.object().shape({
     .required('Informe o valor da transação')
 })
 
+const collectionName = '@gofinances:transactions'
+
 export function Register() {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors }
-  } = useForm({ resolver: yupResolver(schema) })
+  const { navigate } = useNavigation()
   const [transactionType, setTransactionType] = useState('')
   const [isCategoryModalVisibile, setIsCategoryModalVisible] = useState(false)
   const [categorySelected, setCategorySelected] = useState({
     key: 'category',
     name: 'Categoria'
   })
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm({ resolver: yupResolver(schema) })
 
   function handleTrasactionTypeSelect(type: 'income' | 'outcome') {
     setTransactionType(type)
@@ -59,7 +68,11 @@ export function Register() {
     setIsCategoryModalVisible(state => !state)
   }
 
-  function handleRegister({ description, amount }: IFormProps) {
+  function navigateToDashboard() {
+    navigate('Listagem')
+  }
+
+  async function handleRegister({ description, amount }: IFormProps) {
     if (!transactionType) {
       return Alert.alert('Oops!', 'Selecione o tipo da transação.')
     }
@@ -68,14 +81,39 @@ export function Register() {
       return Alert.alert('Oops!', 'Selecione o tipo da categoria.')
     }
 
-    const data = {
+    const newTransacation = {
+      id: String(uuid.v4()),
       description,
       amount,
       transactionType,
-      category: categorySelected.key
+      category: categorySelected.key,
+      date: new Date()
     } as IFormDataProps
 
-    console.log(data)
+    try {
+      const currentStorage = await Storage.getItem(collectionName)
+      const currentStorageParsed = currentStorage
+        ? JSON.parse(currentStorage)
+        : []
+
+      await Storage.setItem(
+        collectionName,
+        JSON.stringify([...currentStorageParsed, newTransacation])
+      )
+
+      setCategorySelected({
+        key: 'category',
+        name: 'Categoria'
+      })
+      setTransactionType('')
+      reset()
+
+      navigateToDashboard()
+    } catch (err) {
+      console.log(err)
+
+      Alert.alert('Oops!', 'Parece que algo deu errado ao salvar seus dados.')
+    }
   }
 
   return (
