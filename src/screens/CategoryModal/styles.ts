@@ -1,8 +1,11 @@
 import styled, { css } from 'styled-components/native'
 import { RFValue } from 'react-native-responsive-fontsize'
 import { Feather } from '@expo/vector-icons'
-import { FlatList, TouchableOpacity } from 'react-native'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { FlatList } from 'react-native'
+import {
+  GestureHandlerRootView,
+  RectButton
+} from 'react-native-gesture-handler'
 
 import { ICategoryProps } from './'
 
@@ -44,7 +47,7 @@ export const ListSeparetor = styled.View`
 
   background-color: ${({ theme }) => theme.colors.border};
 `
-export const ListItem = styled(TouchableOpacity)`
+export const ListItem = styled(RectButton)`
   padding: ${RFValue(14)}px ${RFValue(24)}px;
 
   align-items: center;
@@ -72,5 +75,5 @@ export const Name = styled.Text<INameProps>`
 
 export const Footer = styled.View`
   width: 100%;
-  padding: ${RFValue(24)}px;
+  padding: ${RFValue(10)}px ${RFValue(24)}px;
 `

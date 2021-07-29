@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components/native'
-import { TouchableOpacity } from 'react-native'
+import { RectButton } from 'react-native-gesture-handler'
 import { Feather } from '@expo/vector-icons'
 import { RFValue } from 'react-native-responsive-fontsize'
 
@@ -7,27 +7,34 @@ interface ITypeProps {
   type: 'income' | 'outcome'
 }
 
-interface IContainerProps extends ITypeProps {
+interface IBorderProps {
   isActive: boolean
 }
 
-export const Container = styled(TouchableOpacity)<IContainerProps>`
+interface IButtonProps extends ITypeProps {
+  isActive: boolean
+}
+
+export const Border = styled.View<IBorderProps>`
   width: 48%;
-  padding: ${RFValue(18)}px;
-
   border-radius: 5px;
-
-  align-items: center;
-  justify-content: center;
-  flex-direction: row;
-
-  background-color: ${({ theme }) => theme.colors.shape};
 
   ${({ isActive }) =>
     !isActive &&
     css`
       border: 1.5px solid ${({ theme }) => theme.colors.border};
-    `}
+    `};
+`
+
+export const Button = styled(RectButton)<IButtonProps>`
+  padding: ${RFValue(16)}px;
+  border-radius: 5px;
+
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background-color: ${({ theme }) => theme.colors.shape};
 
   ${({ isActive, type }) =>
     isActive &&

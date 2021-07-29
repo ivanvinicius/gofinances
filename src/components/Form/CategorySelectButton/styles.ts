@@ -1,9 +1,9 @@
 import styled from 'styled-components/native'
-import { TouchableOpacity } from 'react-native'
+import { RectButton } from 'react-native-gesture-handler'
 import { RFValue } from 'react-native-responsive-fontsize'
 import { FontAwesome5 } from '@expo/vector-icons'
 
-export const Container = styled(TouchableOpacity)`
+export const Container = styled(RectButton)`
   width: 100%;
   margin: 8px 0;
   padding: ${RFValue(18)}px;

@@ -1,15 +1,17 @@
 import React from 'react'
-import { TouchableOpacityProps } from 'react-native'
+import { RectButtonProperties } from 'react-native-gesture-handler'
 
 import { Container, Title } from './styles'
 
-interface IButtonProps extends TouchableOpacityProps {
+interface IButtonProps extends RectButtonProperties {
   title: string
+  // to solve problem with hook form
+  onPress: () => void
 }
 
-export function Button({ title, ...rest }: IButtonProps) {
+export function Button({ title, onPress, ...rest }: IButtonProps) {
   return (
-    <Container {...rest}>
+    <Container onPress={onPress} {...rest}>
       <Title>{title}</Title>
     </Container>
   )

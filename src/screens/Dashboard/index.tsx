@@ -1,4 +1,5 @@
 import React from 'react'
+import { Alert } from 'react-native'
 
 import { HighlightCard } from '../../components/HighlightCard'
 import {
@@ -16,6 +17,7 @@ import {
   User,
   UserGreenting,
   UserName,
+  LogOutButton,
   Icon,
   CardsContainer,
   Transactions,
@@ -60,6 +62,10 @@ export function Dashboard() {
     }
   ]
 
+  function handleLogOut() {
+    return Alert.alert('Sair da aplicação', 'Tem certeza que deseja sair?')
+  }
+
   return (
     <Container>
       <Header>
@@ -73,7 +79,9 @@ export function Dashboard() {
             </User>
           </UserInfo>
 
-          <Icon name="power" />
+          <LogOutButton onPress={handleLogOut}>
+            <Icon name="power" />
+          </LogOutButton>
         </UserWrapper>
       </Header>
 
