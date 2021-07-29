@@ -1,12 +1,16 @@
+import styled, { css } from 'styled-components/native'
 import { RFValue } from 'react-native-responsive-fontsize'
-import styled from 'styled-components/native'
 import { Feather } from '@expo/vector-icons'
-import { FlatList } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
+import { FlatList, TouchableOpacity } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
-import { ICategoryDataProps } from './'
+import { ICategoryProps } from './'
 
-export const Container = styled.View`
+interface INameProps {
+  isItemSelected: boolean
+}
+
+export const Container = styled(GestureHandlerRootView)`
   flex: 1;
   background-color: ${({ theme }) => theme.colors.background};
 `
@@ -27,7 +31,7 @@ export const Title = styled.Text`
 `
 
 export const List = styled(
-  FlatList as new () => FlatList<ICategoryDataProps>
+  FlatList as new () => FlatList<ICategoryProps>
 ).attrs({
   showsHorizontalScrollIndicator: false
 })`
@@ -40,7 +44,7 @@ export const ListSeparetor = styled.View`
 
   background-color: ${({ theme }) => theme.colors.border};
 `
-export const ListItem = styled.View`
+export const ListItem = styled(TouchableOpacity)`
   padding: ${RFValue(14)}px ${RFValue(24)}px;
 
   align-items: center;
@@ -52,14 +56,21 @@ export const Icon = styled(Feather)`
   color: ${({ theme }) => theme.colors.title};
 `
 
-export const Name = styled.Text`
+export const Name = styled.Text<INameProps>`
   margin-left: ${RFValue(14)}px;
+
+  color: ${({ theme }) => theme.colors.title};
   font-size: ${RFValue(14)}px;
   font-family: ${({ theme }) => theme.fonts.regular};
-  color: ${({ theme }) => theme.colors.title};
+
+  ${({ isItemSelected }) =>
+    isItemSelected &&
+    css`
+      font-family: ${({ theme }) => theme.fonts.bold};
+    `}
 `
 
 export const Footer = styled.View`
   width: 100%;
-  padding: ${RFValue(14)}px ${RFValue(24)}px ${getBottomSpace() + RFValue(14)}px;
+  padding: ${RFValue(24)}px;
 `

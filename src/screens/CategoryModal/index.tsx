@@ -15,15 +15,19 @@ import {
   Footer
 } from './styles'
 
-export type ICategoryDataProps = typeof categories[0]
+export type ICategoryProps = typeof categories[0]
 
-interface ICategoryProps {
-  category: string
-  setCategory: (category: ICategoryProps) => void
-  closeScreen: () => void
+interface ICategoryModalProps {
+  category: Omit<ICategoryProps, 'icon' | 'color'>
+  setCategory: (category: Omit<ICategoryProps, 'icon' | 'color'>) => void
+  toggleVisibility: () => void
 }
 
-export function Category() {
+export function CategoryModal({
+  category,
+  setCategory,
+  toggleVisibility
+}: ICategoryModalProps) {
   return (
     <Container>
       <Header>
@@ -35,15 +39,15 @@ export function Category() {
         keyExtractor={item => item.key}
         ItemSeparatorComponent={() => <ListSeparetor />}
         renderItem={({ item }) => (
-          <ListItem>
+          <ListItem onPress={() => setCategory(item)}>
             <Icon name={item.icon} />
-            <Name>{item.name}</Name>
+            <Name isItemSelected={item.key === category.key}>{item.name}</Name>
           </ListItem>
         )}
       />
 
       <Footer>
-        <Button title="Selecionar" />
+        <Button title="Selecionar" onPress={toggleVisibility} />
       </Footer>
     </Container>
   )

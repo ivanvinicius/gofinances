@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
+import { Modal } from 'react-native'
 
 import { Button } from '../../components/Form/Button'
-import { CategorySelect } from '../../components/Form/CategorySelect'
+import { CategorySelectButton } from '../../components/Form/CategorySelectButton'
 import { Input } from '../../components/Form/Input'
 import { TransactionTypeButton } from '../../components/Form/TransactionTypeButton'
+import { CategoryModal } from '../CategoryModal'
 
 import {
   Container,
@@ -16,9 +18,18 @@ import {
 
 export function Register() {
   const [transactionType, setTransactionType] = useState('')
+  const [isCategoryModalVisibile, setIsCategoryModalVisible] = useState(false)
+  const [categorySelected, setCategorySelected] = useState({
+    key: 'category',
+    name: 'Categoria'
+  })
 
   function handleTrasactionTypeSelect(type: 'income' | 'outcome') {
     setTransactionType(type)
+  }
+
+  function handleToggleModalVisibility() {
+    setIsCategoryModalVisible(state => !state)
   }
 
   return (
@@ -47,11 +58,22 @@ export function Register() {
             />
           </TransactionsType>
 
-          <CategorySelect category="Categorias" />
+          <CategorySelectButton
+            title={categorySelected.name}
+            onPress={handleToggleModalVisibility}
+          />
         </Fields>
 
         <Button title="Enviar" />
       </Form>
+
+      <Modal visible={isCategoryModalVisibile}>
+        <CategoryModal
+          category={categorySelected}
+          setCategory={setCategorySelected}
+          toggleVisibility={handleToggleModalVisibility}
+        />
+      </Modal>
     </Container>
   )
 }
