@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import { Alert } from 'react-native'
+import Storage from '@react-native-async-storage/async-storage'
+import { useFocusEffect } from '@react-navigation/native'
 
 import { HighlightCard } from '../../components/HighlightCard'
 import {
@@ -26,45 +28,44 @@ import {
 } from './styles'
 
 export function Dashboard() {
-  const dashData: ITrasactionDataProps[] = [
-    {
-      id: '1',
-      type: 'income',
-      title: 'Desenvolvimento de site',
-      amount: 'R$ 12.000,00',
-      category: {
-        name: 'Vendas',
-        icon: 'dollar-sign'
-      },
-      date: '13/04/2020'
-    },
-    {
-      id: '2',
-      type: 'outcome',
-      title: 'Hamburgueria Pizzy',
-      amount: 'R$ 59,00',
-      category: {
-        name: 'Alimentação',
-        icon: 'coffee'
-      },
-      date: '10/04/2020'
-    },
-    {
-      id: '3',
-      type: 'outcome',
-      title: 'Aluguel do apartamento em Rio do Sul',
-      amount: 'R$ 1.348,50',
-      category: {
-        name: 'Moradia',
-        icon: 'home'
-      },
-      date: '13/05/2020'
-    }
-  ]
+  const [data, setData] = useState<ITrasactionDataProps[]>([])
 
   function handleLogOut() {
     return Alert.alert('Sair da aplicação', 'Tem certeza que deseja sair?')
   }
+
+  async function loadTransactionsFromStorage() {
+    const collectionName = '@gofinances:transactions'
+
+    const response = await Storage.getItem(collectionName)
+
+    const transactions = response ? JSON.parse(response) : []
+
+    const formattedTransactions: ITrasactionDataProps[] = transactions.map(
+      ({ date, amount, ...rest }: ITrasactionDataProps) => ({
+        date: Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit'
+        }).format(new Date(date)),
+
+        amount: Number(amount).toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        }),
+
+        ...rest
+      })
+    )
+
+    setData(formattedTransactions)
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTransactionsFromStorage()
+    }, [])
+  )
 
   return (
     <Container>
@@ -110,7 +111,7 @@ export function Dashboard() {
         <Title>Listagem</Title>
 
         <TransactionList
-          data={dashData}
+          data={data}
           keyExtractor={item => item.id}
           renderItem={({ item }) => <TransactionCard data={item} />}
         />

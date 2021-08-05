@@ -12,6 +12,7 @@ import { ControlledInput } from '../../components/Form/ControlledInput'
 import { CategorySelectButton } from '../../components/Form/CategorySelectButton'
 import { TransactionTypeButton } from '../../components/Form/TransactionTypeButton'
 import { CategoryModal } from '../CategoryModal'
+import { ITrasactionDataProps } from '../../components/TransactionCard'
 
 import {
   Container,
@@ -23,27 +24,18 @@ import {
 } from './styles'
 
 interface IFormProps {
-  description: string
+  title: string
   amount: string
 }
 
-interface IFormDataProps extends IFormProps {
-  id: string
-  transactionType: 'income' | 'outcome'
-  category: string
-  date: Date
-}
-
 const schema = Y.object().shape({
-  description: Y.string().required('Informe a descrição da transação'),
+  title: Y.string().required('Informe o título da transação'),
 
   amount: Y.number()
     .positive('Apenas valores positivos')
     .typeError('Informe um valor númerico')
     .required('Informe o valor da transação')
 })
-
-const collectionName = '@gofinances:transactions'
 
 export function Register() {
   const { navigate } = useNavigation()
@@ -72,7 +64,7 @@ export function Register() {
     navigate('Listagem')
   }
 
-  async function handleRegister({ description, amount }: IFormProps) {
+  async function handleRegister({ title, amount }: IFormProps) {
     if (!transactionType) {
       return Alert.alert('Oops!', 'Selecione o tipo da transação.')
     }
@@ -83,14 +75,16 @@ export function Register() {
 
     const newTransacation = {
       id: String(uuid.v4()),
-      description,
+      title,
       amount,
       transactionType,
       category: categorySelected.key,
       date: new Date()
-    } as IFormDataProps
+    } as ITrasactionDataProps
 
     try {
+      const collectionName = '@gofinances:transactions'
+
       const currentStorage = await Storage.getItem(collectionName)
       const currentStorageParsed = currentStorage
         ? JSON.parse(currentStorage)
@@ -101,12 +95,9 @@ export function Register() {
         JSON.stringify([...currentStorageParsed, newTransacation])
       )
 
-      setCategorySelected({
-        key: 'category',
-        name: 'Categoria'
-      })
-      setTransactionType('')
       reset()
+      setTransactionType('')
+      setCategorySelected({ key: 'category', name: 'Categoria' })
 
       navigateToDashboard()
     } catch (err) {
@@ -126,12 +117,12 @@ export function Register() {
         <Form>
           <Fields>
             <ControlledInput
-              name="description"
+              name="title"
               control={control}
-              placeholder="Descrição"
+              placeholder="Título"
               autoCapitalize="sentences"
               autoCorrect={false}
-              error={errors.description && errors.description.message}
+              error={errors.title && errors.title.message}
             />
             <ControlledInput
               name="amount"
