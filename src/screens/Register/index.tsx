@@ -24,13 +24,12 @@ import {
 } from './styles'
 
 interface IFormProps {
-  title: string
+  name: string
   amount: string
 }
 
 const schema = Y.object().shape({
-  title: Y.string().required('Informe o título da transação'),
-
+  name: Y.string().required('Informe o nome da transação'),
   amount: Y.number()
     .positive('Apenas valores positivos')
     .typeError('Informe um valor númerico')
@@ -64,7 +63,7 @@ export function Register() {
     navigate('Listagem')
   }
 
-  async function handleRegister({ title, amount }: IFormProps) {
+  async function handleRegister({ name, amount }: IFormProps) {
     if (!transactionType) {
       return Alert.alert('Oops!', 'Selecione o tipo da transação.')
     }
@@ -75,7 +74,7 @@ export function Register() {
 
     const newTransacation = {
       id: String(uuid.v4()),
-      title,
+      name,
       amount,
       transactionType,
       category: categorySelected.key,
@@ -106,7 +105,6 @@ export function Register() {
       Alert.alert('Oops!', 'Parece que algo deu errado ao salvar seus dados.')
     }
   }
-
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <Container>
@@ -117,12 +115,12 @@ export function Register() {
         <Form>
           <Fields>
             <ControlledInput
-              name="title"
+              name="name"
               control={control}
-              placeholder="Título"
+              placeholder="Nome"
               autoCapitalize="sentences"
               autoCorrect={false}
-              error={errors.title && errors.title.message}
+              error={errors.name && errors.name.message}
             />
             <ControlledInput
               name="amount"

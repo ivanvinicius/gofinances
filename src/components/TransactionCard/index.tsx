@@ -4,7 +4,7 @@ import { categories } from '../../utils/categories'
 
 import {
   Container,
-  Title,
+  Name,
   Amount,
   Footer,
   Category,
@@ -16,7 +16,7 @@ import {
 export interface ITrasactionDataProps {
   id: string
   transactionType: 'income' | 'outcome'
-  title: string
+  name: string
   amount: string
   category: string
   date: string | Date
@@ -33,7 +33,7 @@ export function TransactionCard({ data }: ITransactionCardProps) {
 
   return (
     <Container>
-      <Title>{data.title}</Title>
+      <Name>{data.name}</Name>
       <Amount type={data.transactionType}>
         {data.transactionType === 'outcome' && '- '}
         {data.amount}

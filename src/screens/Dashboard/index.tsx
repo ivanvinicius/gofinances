@@ -76,7 +76,7 @@ export function Dashboard() {
 
             <User>
               <UserGreenting>Olá,</UserGreenting>
-              <UserName>Vinicius</UserName>
+              <UserName>Ivan</UserName>
             </User>
           </UserInfo>
 
