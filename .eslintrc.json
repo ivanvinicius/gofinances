@@ -44,7 +44,8 @@
       //     }
       //   }
       // ],
-      
+      "prefer-spread":"off",
+      "multiline-ternary": "off",
       "react/display-name": "off",
       "camelcase": "off",
       "react/prop-types": "off",

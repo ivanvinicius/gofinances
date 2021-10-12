@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons'
 
 import { Dashboard } from '../screens/Dashboard'
 import { Register } from '../screens/Register'
+import { Summary } from '../screens/Summary'
 import theme from '../global/styles/theme'
 
 const { Navigator, Screen } = createBottomTabNavigator()
@@ -51,7 +52,7 @@ export function AppRoutes() {
       />
       <Screen
         name="Resumo"
-        component={Register}
+        component={Summary}
         options={{
           tabBarIcon: ({ size, color }) => (
             <Feather name="pie-chart" size={size} color={color} />

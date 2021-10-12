@@ -37,7 +37,7 @@ export function HighlightCard({
       </Header>
 
       <Footer>
-        <Amount type={type}>{amount}</Amount>
+        <Amount type={type}> {amount}</Amount>
         <LastTransaction type={type}>{lastTransaction}</LastTransaction>
       </Footer>
     </Container>
