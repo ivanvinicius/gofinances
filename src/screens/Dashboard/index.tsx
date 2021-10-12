@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react' //eslint-disable-line
 import { ActivityIndicator, Alert } from 'react-native'
 import Storage from '@react-native-async-storage/async-storage'
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect } from '@react-navigation/native' //eslint-disable-line
 import { useTheme } from 'styled-components/native'
 
 import { HighlightCard } from '../../components/HighlightCard'
@@ -41,6 +41,14 @@ interface IHighlightCardData {
 }
 
 export function Dashboard() {
+  // useEffect(() => {
+  //   async function reset() {
+  //     await Storage.removeItem('@gofinances:transactions')
+  //   }
+
+  //   reset()
+  // }, [])
+
   const theme = useTheme()
   const [isLoading, setIsLoading] = useState(true)
   const [transactions, setTransactions] = useState<ITrasactionDataProps[]>([])
@@ -51,18 +59,26 @@ export function Dashboard() {
     transactions: ITrasactionDataProps[],
     transactionType: 'income' | 'outcome'
   ) {
-    const findLastTransaction = new Date(
-      Math.max.apply(
-        Math,
-        transactions
-          .filter(
-            currentItem => currentItem.transactionType === transactionType
-          )
-          .map(currentItem => new Date(currentItem.date).getTime())
+    const translatedTransactionType = { income: 'entrada', outcome: 'saída' }
+
+    const getAllTransactionsByType = transactions.filter(
+      transaction => transaction.transactionType === transactionType
+    )
+
+    if (getAllTransactionsByType.length === 0) {
+      return `Nenhuma ${translatedTransactionType[transactionType]}`
+    }
+
+    const getLastTransaction = Math.max.apply(
+      Math,
+      getAllTransactionsByType.map(transaction =>
+        new Date(transaction.date).getTime()
       )
     )
 
-    return `dia ${findLastTransaction.getDate()} de ${findLastTransaction.toLocaleString(
+    const lastTransactionToDate = new Date(getLastTransaction)
+
+    return `dia ${lastTransactionToDate.getDate()} de ${lastTransactionToDate.toLocaleString(
       'pt-BR',
       { month: 'long' }
     )}`
@@ -106,7 +122,10 @@ export function Dashboard() {
 
     const inLastTransaction = getLastTransactionTime(transactions, 'income')
     const outLastTrasaction = getLastTransactionTime(transactions, 'outcome')
-    const totalIntervalTransactions = `01 à ${outLastTrasaction}`
+    const totalIntervalTransactions = `01 à ${new Date().getDate()} de ${new Date().toLocaleString(
+      'pt-BR',
+      { month: 'long' }
+    )}`
 
     setHighlightCardData({
       income: {
@@ -114,14 +133,20 @@ export function Dashboard() {
           style: 'currency',
           currency: 'BRL'
         }),
-        lastTransaction: inLastTransaction
+        lastTransaction:
+          inLastTransaction === 'Nenhuma entrada'
+            ? inLastTransaction
+            : `Última entrada ${inLastTransaction}`
       },
       outcome: {
         sum: outcomeSum.toLocaleString('pt-BR', {
           style: 'currency',
           currency: 'BRL'
         }),
-        lastTransaction: outLastTrasaction
+        lastTransaction:
+          outLastTrasaction === 'Nenhuma saída'
+            ? outLastTrasaction
+            : `Última saída ${outLastTrasaction}`
       },
       total: {
         sum: totalSum.toLocaleString('pt-BR', {
@@ -176,13 +201,13 @@ export function Dashboard() {
             <HighlightCard
               title="Entradas"
               amount={highlightCardData.income.sum}
-              lastTransaction={`Última entrada ${highlightCardData.income.lastTransaction}`}
+              lastTransaction={highlightCardData.income.lastTransaction}
               type="up"
             />
             <HighlightCard
               title="Saídas"
               amount={highlightCardData.outcome.sum}
-              lastTransaction={`Última saída ${highlightCardData.outcome.lastTransaction}`}
+              lastTransaction={highlightCardData.outcome.lastTransaction}
               type="down"
             />
             <HighlightCard

@@ -1,9 +1,5 @@
 import styled from 'styled-components/native'
 import { RFValue } from 'react-native-responsive-fontsize'
-import { FlatList } from 'react-native'
-import { getBottomSpace } from 'react-native-iphone-x-helper'
-
-import { ITotalByCategoryProps } from './'
 
 export const Container = styled.View`
   flex: 1;
@@ -25,15 +21,13 @@ export const Title = styled.Text`
   color: ${({ theme }) => theme.colors.shape};
 `
 
-export const Content = styled.View`
+export const Content = styled.ScrollView`
   flex: 1;
-
-  padding: ${RFValue(24)}px;
+  padding: 0 ${RFValue(24)}px;
 `
 
-export const ChartCardList = styled(
-  FlatList as new () => FlatList<ITotalByCategoryProps>
-).attrs({
-  showsVerticalScrollIndicator: false,
-  contentContainerStyle: { paddingBottom: getBottomSpace() }
-})``
+export const ChartContainer = styled.View`
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+`
