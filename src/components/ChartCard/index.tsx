@@ -1,11 +1,18 @@
 import React from 'react'
 
-import { Container, Title } from './styles'
+import { Container, CategoryName, Amount } from './styles'
 
-export function ChartCard() {
+interface IChartCardProps {
+  color: string
+  categoryName: string
+  amount: string
+}
+
+export function ChartCard({ color, categoryName, amount }: IChartCardProps) {
   return (
-    <Container>
-      <Title>ChartCard</Title>
+    <Container color={color}>
+      <CategoryName>{categoryName}</CategoryName>
+      <Amount>{amount}</Amount>
     </Container>
   )
 }
