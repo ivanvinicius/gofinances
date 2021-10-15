@@ -13,6 +13,7 @@ import {
   Poppins_400Regular
 } from '@expo-google-fonts/poppins'
 
+import { AuthProvider } from './hooks/auth'
 // import { Routes } from './routes'
 import { SignIn } from './screens/SignIn'
 import theme from './global/styles/theme'
@@ -31,7 +32,10 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <StatusBar style="light" translucent />
-      <SignIn />
+
+      <AuthProvider>
+        <SignIn />
+      </AuthProvider>
     </ThemeProvider>
   )
 }
