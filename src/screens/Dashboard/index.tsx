@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react' //eslint-disable-line
+import React, { useState, useCallback } from 'react'
 import { ActivityIndicator, Alert } from 'react-native'
 import Storage from '@react-native-async-storage/async-storage'
-import { useFocusEffect } from '@react-navigation/native' //eslint-disable-line
+import { useFocusEffect } from '@react-navigation/native'
 import { useTheme } from 'styled-components/native'
 
 import { HighlightCard } from '../../components/HighlightCard'
@@ -41,14 +41,6 @@ interface IHighlightCardData {
 }
 
 export function Dashboard() {
-  // useEffect(() => {
-  //   async function reset() {
-  //     await Storage.removeItem('@gofinances:transactions')
-  //   }
-
-  //   reset()
-  // }, [])
-
   const theme = useTheme()
   const [isLoading, setIsLoading] = useState(true)
   const [transactions, setTransactions] = useState<ITrasactionDataProps[]>([])
@@ -85,81 +77,88 @@ export function Dashboard() {
   }
 
   const loadTransactionsFromStorage = useCallback(async () => {
-    let incomeSum = 0
-    let outcomeSum = 0
+    try {
+      let incomeSum = 0
+      let outcomeSum = 0
 
-    const collectionName = '@gofinances:transactions'
-    const response = await Storage.getItem(collectionName)
-    const transactions = response ? JSON.parse(response) : []
+      const collectionName = '@gofinances:transactions'
+      const response = await Storage.getItem(collectionName)
+      const transactions = response ? JSON.parse(response) : []
 
-    const formattedTransactions: ITrasactionDataProps[] = transactions.map(
-      ({ transactionType, date, amount, ...rest }: ITrasactionDataProps) => {
-        transactionType === 'income'
-          ? (incomeSum += Number(amount))
-          : (outcomeSum += Number(amount))
+      const formattedTransactions: ITrasactionDataProps[] = transactions.map(
+        ({ transactionType, date, amount, ...rest }: ITrasactionDataProps) => {
+          transactionType === 'income'
+            ? (incomeSum += Number(amount))
+            : (outcomeSum += Number(amount))
 
-        const formattedDate = Intl.DateTimeFormat('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        }).format(new Date(date))
+          const formattedDate = Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }).format(new Date(date))
 
-        const formattedAmount = Number(amount).toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL'
-        })
+          const formattedAmount = Number(amount).toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          })
 
-        return {
-          transactionType,
-          date: formattedDate,
-          amount: formattedAmount,
-          ...rest
+          return {
+            transactionType,
+            date: formattedDate,
+            amount: formattedAmount,
+            ...rest
+          }
         }
-      }
-    )
+      )
 
-    const totalSum = incomeSum - outcomeSum
+      const totalSum = incomeSum - outcomeSum
 
-    const inLastTransaction = getLastTransactionTime(transactions, 'income')
-    const outLastTrasaction = getLastTransactionTime(transactions, 'outcome')
-    const totalIntervalTransactions = `01 à ${new Date().getDate()} de ${new Date().toLocaleString(
-      'pt-BR',
-      { month: 'long' }
-    )}`
+      const inLastTransaction = getLastTransactionTime(transactions, 'income')
+      const outLastTrasaction = getLastTransactionTime(transactions, 'outcome')
+      const totalIntervalTransactions = `01 à ${new Date().getDate()} de ${new Date().toLocaleString(
+        'pt-BR',
+        { month: 'long' }
+      )}`
 
-    setHighlightCardData({
-      income: {
-        sum: incomeSum.toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL'
-        }),
-        lastTransaction:
-          inLastTransaction === 'Nenhuma entrada'
-            ? inLastTransaction
-            : `Última entrada ${inLastTransaction}`
-      },
-      outcome: {
-        sum: outcomeSum.toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL'
-        }),
-        lastTransaction:
-          outLastTrasaction === 'Nenhuma saída'
-            ? outLastTrasaction
-            : `Última saída ${outLastTrasaction}`
-      },
-      total: {
-        sum: totalSum.toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL'
-        }),
-        lastTransaction: totalIntervalTransactions
-      }
-    })
+      setHighlightCardData({
+        income: {
+          sum: incomeSum.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }),
+          lastTransaction:
+            inLastTransaction === 'Nenhuma entrada'
+              ? inLastTransaction
+              : `Última entrada ${inLastTransaction}`
+        },
+        outcome: {
+          sum: outcomeSum.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }),
+          lastTransaction:
+            outLastTrasaction === 'Nenhuma saída'
+              ? outLastTrasaction
+              : `Última saída ${outLastTrasaction}`
+        },
+        total: {
+          sum: totalSum.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }),
+          lastTransaction: totalIntervalTransactions
+        }
+      })
 
-    setTransactions(formattedTransactions)
-
-    setIsLoading(false)
+      setTransactions(formattedTransactions)
+    } catch (error) {
+      Alert.alert(
+        'Oops!',
+        'Não foi possível fazer o carregamento das informações.'
+      )
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   useFocusEffect(

@@ -1,16 +1,30 @@
+/* eslint-disable import/no-duplicates */
+
 import React, { useState, useCallback } from 'react'
-import { Alert } from 'react-native'
+import { Alert, ScrollView, ActivityIndicator } from 'react-native'
 import Storage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native'
 import { VictoryPie } from 'victory-native'
 import { RFValue } from 'react-native-responsive-fontsize'
 import { useTheme } from 'styled-components/native'
+import { BorderlessButton } from 'react-native-gesture-handler'
+import { subMonths, addMonths, format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 import { ChartCard } from '../../components/ChartCard'
 import { ITrasactionDataProps } from '../../components/TransactionCard'
 import { categories } from '../../utils/categories'
 
-import { Container, Header, Title, Content, ChartContainer } from './styles'
+import {
+  Container,
+  LoadingContainer,
+  Header,
+  Title,
+  ChartContainer,
+  Filter,
+  Icon,
+  Month
+} from './styles'
 
 export interface ITotalByCategoryProps {
   name: string
@@ -22,9 +36,21 @@ export interface ITotalByCategoryProps {
 
 export function Summary() {
   const theme = useTheme()
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const [totalByCategories, setTotalByCategories] = useState<
     ITotalByCategoryProps[]
   >([])
+
+  function handleDateChange(action: 'prev' | 'next') {
+    setIsLoading(true)
+
+    if (action === 'prev') {
+      setSelectedDate(subMonths(selectedDate, 1))
+    } else {
+      setSelectedDate(addMonths(selectedDate, 1))
+    }
+  }
 
   function getSumAndPercentageByCategory(transactions: ITrasactionDataProps[]) {
     const totalByCategory: ITotalByCategoryProps[] = []
@@ -74,7 +100,10 @@ export function Summary() {
 
       const allOutcomeTransactions = parsedTransactions.filter(
         (transaction: ITrasactionDataProps) =>
-          transaction.transactionType === 'outcome'
+          transaction.transactionType === 'outcome' &&
+          new Date(transaction.date).getMonth() === selectedDate.getMonth() &&
+          new Date(transaction.date).getFullYear() ===
+            selectedDate.getFullYear()
       )
 
       setTotalByCategories(
@@ -85,8 +114,10 @@ export function Summary() {
         'Oops!',
         'Não foi possível fazer o carregamento das informações.'
       )
+    } finally {
+      setIsLoading(false)
     }
-  }, [])
+  }, [selectedDate])
 
   useFocusEffect(
     useCallback(() => {
@@ -99,34 +130,58 @@ export function Summary() {
       <Header>
         <Title>Resumo por categoria</Title>
       </Header>
+      {isLoading === true ? (
+        <LoadingContainer>
+          <ActivityIndicator size={50} color={theme.colors.secondary} />
+        </LoadingContainer>
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: RFValue(24)
+          }}
+        >
+          <Filter>
+            <BorderlessButton onPress={() => handleDateChange('prev')}>
+              <Icon name="chevron-left" />
+            </BorderlessButton>
 
-      <Content>
-        <ChartContainer>
-          <VictoryPie
-            data={totalByCategories}
-            colorScale={totalByCategories.map(({ color }) => color)}
-            style={{
-              labels: {
-                fontSize: RFValue(18),
-                fill: theme.colors.shape,
-                fontWeight: 'bold'
-              }
-            }}
-            labelRadius={110}
-            x="percentage"
-            y="unformattedSum"
-          />
-        </ChartContainer>
+            <Month>
+              {format(selectedDate, 'MMMM, yyyy', { locale: ptBR })}
+            </Month>
 
-        {totalByCategories.map(({ name, color, formattedSum }) => (
-          <ChartCard
-            key={name}
-            categoryName={name}
-            color={color}
-            amount={formattedSum}
-          />
-        ))}
-      </Content>
+            <BorderlessButton onPress={() => handleDateChange('next')}>
+              <Icon name="chevron-right" />
+            </BorderlessButton>
+          </Filter>
+
+          <ChartContainer>
+            <VictoryPie
+              data={totalByCategories}
+              colorScale={totalByCategories.map(({ color }) => color)}
+              style={{
+                labels: {
+                  fontSize: RFValue(18),
+                  fill: theme.colors.shape,
+                  fontWeight: 'bold'
+                }
+              }}
+              labelRadius={110}
+              x="percentage"
+              y="unformattedSum"
+            />
+          </ChartContainer>
+
+          {totalByCategories.map(({ name, color, formattedSum }) => (
+            <ChartCard
+              key={name}
+              categoryName={name}
+              color={color}
+              amount={formattedSum}
+            />
+          ))}
+        </ScrollView>
+      )}
     </Container>
   )
 }

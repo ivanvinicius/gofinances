@@ -119,7 +119,6 @@ export function Register() {
               control={control}
               placeholder="Nome"
               autoCapitalize="sentences"
-              autoCorrect={false}
               error={errors.name && errors.name.message}
             />
             <ControlledInput
