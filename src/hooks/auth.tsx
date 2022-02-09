@@ -1,8 +1,10 @@
 /* eslint-disable camelcase */
-/* eslint-disable  no-undef */
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import React, { createContext, useContext, useState } from 'react'
 import * as AuthSession from 'expo-auth-session'
+import * as AppleAuthentication from 'expo-apple-authentication'
 
 interface IAuthProviderProps {
   children: React.ReactNode
@@ -11,17 +13,16 @@ interface IAuthProviderProps {
 interface IUser {
   id: string
   email: string
-  name: string
+  name: string | undefined
   given_name: string
   family_name: string
-  picture: string
-  locale: string
-  verified_email: string
+  picture: string | undefined
 }
 
 interface IAuthProviderData {
   user: IUser
   GoogleSignIn: () => void
+  AppleSignIn: () => void
 }
 
 interface IAuthSessionResponse {
@@ -29,6 +30,11 @@ interface IAuthSessionResponse {
     access_token: string
   }
   type: string
+}
+
+interface ICustomErrorType {
+  code: string
+  message: string
 }
 
 const { CLIENT_ID } = process.env
@@ -63,8 +69,38 @@ function AuthProvider({ children }: IAuthProviderProps) {
     }
   }
 
+  async function AppleSignIn() {
+    try {
+      const credentials = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL
+        ]
+      })
+
+      if (credentials) {
+        const formattedUser = {
+          id: credentials.authorizationCode,
+          email: credentials.email,
+          name: undefined,
+          given_name: credentials.fullName!.givenName!,
+          family_name: credentials.fullName!.familyName!,
+          picture: undefined
+        } as IUser
+
+        setUser(formattedUser)
+      }
+    } catch (err) {
+      const typedError = err as ICustomErrorType
+
+      if (typedError.code !== 'ERR_CANCELED') {
+        throw new Error(typedError.message)
+      }
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, GoogleSignIn }}>
+    <AuthContext.Provider value={{ user, GoogleSignIn, AppleSignIn }}>
       {children}
     </AuthContext.Provider>
   )
