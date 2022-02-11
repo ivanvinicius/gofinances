@@ -12,23 +12,21 @@ const { Navigator, Screen } = createBottomTabNavigator()
 export function AppRoutes() {
   return (
     <Navigator
-      tabBarOptions={{
-        activeTintColor: theme.colors.secondary,
-        inactiveTintColor: theme.colors.text,
-        labelPosition: 'beside-icon',
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: theme.colors.secondary,
+        tabBarInactiveTintColor: theme.colors.text,
 
-        tabStyle: {
+        tabBarLabelPosition: 'beside-icon',
+
+        tabBarStyle: {
           alignItems: 'center',
           justifyContent: 'center'
         },
 
-        labelStyle: {
+        tabBarLabelStyle: {
           fontFamily: theme.fonts.medium,
           fontSize: 14
-        },
-
-        style: {
-          height: 60
         }
       }}
     >

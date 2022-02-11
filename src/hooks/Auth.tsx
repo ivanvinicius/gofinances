@@ -1,10 +1,9 @@
-/* eslint-disable camelcase */
 /* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import * as AuthSession from 'expo-auth-session'
 import * as AppleAuthentication from 'expo-apple-authentication'
+import Storage from '@react-native-async-storage/async-storage'
 
 interface IAuthProviderProps {
   children: React.ReactNode
@@ -13,16 +12,18 @@ interface IAuthProviderProps {
 interface IUser {
   id: string
   email: string
-  name: string | undefined
+  name: string
   given_name: string
   family_name: string
-  picture: string | undefined
+  picture: string
 }
 
-interface IAuthProviderData {
+interface IAuthContext {
   user: IUser
-  GoogleSignIn: () => void
-  AppleSignIn: () => void
+  GoogleSignIn: () => Promise<void>
+  AppleSignIn: () => Promise<void>
+  SignOut: () => Promise<void>
+  loginLoading: boolean
 }
 
 interface IAuthSessionResponse {
@@ -32,20 +33,17 @@ interface IAuthSessionResponse {
   type: string
 }
 
-interface ICustomErrorType {
-  code: string
-  message: string
-}
-
 const { CLIENT_ID } = process.env
 const { REDIRECT_URI } = process.env
+const storageCollectionKey = '@gofinances:user'
 
-const AuthContext = createContext({} as IAuthProviderData)
+const AuthContext = createContext({} as IAuthContext)
 
 function AuthProvider({ children }: IAuthProviderProps) {
   const [user, setUser] = useState<IUser>({} as IUser)
+  const [loginLoading, setLoginLoading] = useState(true)
 
-  async function GoogleSignIn() {
+  async function GoogleSignIn(): Promise<void> {
     try {
       const GOOGLE_END_POINT = 'https://accounts.google.com/o/oauth2/v2/auth'
       const RESPONSE_TYPE = 'token'
@@ -62,14 +60,17 @@ function AuthProvider({ children }: IAuthProviderProps) {
 
         fetch(`${infoUrl}&access_token=${params.access_token}`)
           .then(response => response.json())
-          .then(userInfo => setUser(userInfo))
+          .then(userInfo => {
+            setUser(userInfo)
+            Storage.setItem(storageCollectionKey, JSON.stringify(userInfo))
+          })
       }
     } catch (err) {
       throw new Error(String(err))
     }
   }
 
-  async function AppleSignIn() {
+  async function AppleSignIn(): Promise<void> {
     try {
       const credentials = await AppleAuthentication.signInAsync({
         requestedScopes: [
@@ -79,35 +80,62 @@ function AuthProvider({ children }: IAuthProviderProps) {
       })
 
       if (credentials) {
+        const given_name = credentials.fullName!.givenName!
+        const picture = `https://ui-avatars.com/api/?length=1&background=0D8ABC&color=fff&name=${given_name}`
+
         const formattedUser = {
           id: credentials.authorizationCode,
           email: credentials.email,
-          name: undefined,
-          given_name: credentials.fullName!.givenName!,
+          name: 'Usuário',
+          given_name,
           family_name: credentials.fullName!.familyName!,
-          picture: undefined
+          picture
         } as IUser
 
         setUser(formattedUser)
+        Storage.setItem(storageCollectionKey, JSON.stringify(formattedUser))
       }
     } catch (err) {
-      const typedError = err as ICustomErrorType
-
-      if (typedError.code !== 'ERR_CANCELED') {
-        throw new Error(typedError.message)
-      }
+      throw new Error(String(err))
     }
   }
 
+  async function SignOut(): Promise<void> {
+    await Storage.removeItem(storageCollectionKey)
+    setUser({} as IUser)
+  }
+
+  useEffect(() => {
+    async function loadUserDataFromStorage(): Promise<void> {
+      const userData = await Storage.getItem(storageCollectionKey)
+
+      if (userData) {
+        const formattedData: IUser = JSON.parse(userData)
+
+        setUser(formattedData)
+      }
+
+      setLoginLoading(false)
+    }
+
+    loadUserDataFromStorage()
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, GoogleSignIn, AppleSignIn }}>
+    <AuthContext.Provider
+      value={{ user, GoogleSignIn, AppleSignIn, SignOut, loginLoading }}
+    >
       {children}
     </AuthContext.Provider>
   )
 }
 
-function useAuth() {
+function useAuth(): IAuthContext {
   const context = useContext(AuthContext)
+
+  if (!context) {
+    throw new Error('UseAuth Hook must be used within an AuthProvider.')
+  }
 
   return context
 }

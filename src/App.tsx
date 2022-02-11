@@ -6,26 +6,30 @@ import React from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { ThemeProvider } from 'styled-components'
 import AppLoading from 'expo-app-loading'
-import {
-  useFonts,
-  Poppins_700Bold,
-  Poppins_500Medium,
-  Poppins_400Regular
-} from '@expo-google-fonts/poppins'
+import { useFonts, Poppins_700Bold, Poppins_500Medium, Poppins_400Regular } from '@expo-google-fonts/poppins' //eslint-disable-line
 
-import { AuthProvider } from './hooks/auth'
-// import { Routes } from './routes'
-import { SignIn } from './screens/SignIn'
+
+import { AppProvider } from './hooks'
+import { Routes } from './routes'
+import { useAuth } from './hooks/Auth'
 import theme from './global/styles/theme'
 
 export function App() {
+  const { loginLoading } = useAuth()
   const [isFontsLoaded] = useFonts({
     Poppins_700Bold,
     Poppins_500Medium,
     Poppins_400Regular
   })
 
-  if (!isFontsLoaded) {
+  // useEffect(() => {
+  //   async function clear() {
+  //     await AsyncStorage.clear()
+  //   }
+  //   clear()
+  // }, [])
+
+  if (!isFontsLoaded || loginLoading) {
     return <AppLoading />
   }
 
@@ -33,9 +37,9 @@ export function App() {
     <ThemeProvider theme={theme}>
       <StatusBar style="light" translucent />
 
-      <AuthProvider>
-        <SignIn />
-      </AuthProvider>
+      <AppProvider>
+        <Routes />
+      </AppProvider>
     </ThemeProvider>
   )
 }

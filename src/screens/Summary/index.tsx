@@ -14,6 +14,7 @@ import { ptBR } from 'date-fns/locale'
 import { ChartCard } from '../../components/ChartCard'
 import { ITrasactionDataProps } from '../../components/TransactionCard'
 import { categories } from '../../utils/categories'
+import { useAuth } from '../../hooks/Auth'
 
 import {
   Container,
@@ -35,6 +36,7 @@ export interface ITotalByCategoryProps {
 }
 
 export function Summary() {
+  const { user } = useAuth()
   const theme = useTheme()
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -94,8 +96,8 @@ export function Summary() {
 
   const loadDataFromStorage = useCallback(async () => {
     try {
-      const collectionName = '@gofinances:transactions'
-      const response = await Storage.getItem(collectionName)
+      const storageCollectionKey = `@gofinances:transactions:user=${user.id}`
+      const response = await Storage.getItem(storageCollectionKey)
       const parsedTransactions = response ? JSON.parse(response) : []
 
       const allOutcomeTransactions = parsedTransactions.filter(
@@ -117,7 +119,7 @@ export function Summary() {
     } finally {
       setIsLoading(false)
     }
-  }, [selectedDate])
+  }, [selectedDate, user.id])
 
   useFocusEffect(
     useCallback(() => {

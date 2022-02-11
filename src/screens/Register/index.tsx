@@ -7,6 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import Storage from '@react-native-async-storage/async-storage'
 import uuid from 'react-native-uuid'
 
+import { useAuth } from '../../hooks/Auth'
 import { Button } from '../../components/Form/Button'
 import { ControlledInput } from '../../components/Form/ControlledInput'
 import { CategorySelectButton } from '../../components/Form/CategorySelectButton'
@@ -37,7 +38,8 @@ const schema = Y.object().shape({
 })
 
 export function Register() {
-  const { navigate } = useNavigation()
+  const { user } = useAuth()
+  const navigation = useNavigation()
   const [transactionType, setTransactionType] = useState('')
   const [isCategoryModalVisibile, setIsCategoryModalVisible] = useState(false)
   const [categorySelected, setCategorySelected] = useState({
@@ -60,7 +62,7 @@ export function Register() {
   }
 
   function navigateToDashboard() {
-    navigate('Listagem')
+    navigation.navigate('Listagem' as never)
   }
 
   async function handleRegister({ name, amount }: IFormProps) {
@@ -82,15 +84,15 @@ export function Register() {
     } as ITrasactionDataProps
 
     try {
-      const collectionName = '@gofinances:transactions'
+      const storageCollectionKey = `@gofinances:transactions:user=${user.id}`
 
-      const currentStorage = await Storage.getItem(collectionName)
+      const currentStorage = await Storage.getItem(storageCollectionKey)
       const currentStorageParsed = currentStorage
         ? JSON.parse(currentStorage)
         : []
 
       await Storage.setItem(
-        collectionName,
+        storageCollectionKey,
         JSON.stringify([...currentStorageParsed, newTransacation])
       )
 
@@ -100,11 +102,10 @@ export function Register() {
 
       navigateToDashboard()
     } catch (err) {
-      console.log(err)
-
       Alert.alert('Oops!', 'Parece que algo deu errado ao salvar seus dados.')
     }
   }
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <Container>

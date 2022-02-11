@@ -4,12 +4,12 @@ import Storage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native'
 import { useTheme } from 'styled-components/native'
 
+import { useAuth } from '../../hooks/Auth'
 import { HighlightCard } from '../../components/HighlightCard'
 import {
   TransactionCard,
   ITrasactionDataProps
 } from '../../components/TransactionCard'
-import profilePic from '../../utils/profilePic'
 
 import {
   Container,
@@ -41,6 +41,7 @@ interface IHighlightCardData {
 }
 
 export function Dashboard() {
+  const { SignOut, user } = useAuth()
   const theme = useTheme()
   const [isLoading, setIsLoading] = useState(true)
   const [transactions, setTransactions] = useState<ITrasactionDataProps[]>([])
@@ -81,8 +82,8 @@ export function Dashboard() {
       let incomeSum = 0
       let outcomeSum = 0
 
-      const collectionName = '@gofinances:transactions'
-      const response = await Storage.getItem(collectionName)
+      const storageCollectionKey = `@gofinances:transactions:user=${user.id}`
+      const response = await Storage.getItem(storageCollectionKey)
       const transactions = response ? JSON.parse(response) : []
 
       const formattedTransactions: ITrasactionDataProps[] = transactions.map(
@@ -159,7 +160,7 @@ export function Dashboard() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [user.id])
 
   useFocusEffect(
     useCallback(() => {
@@ -168,7 +169,13 @@ export function Dashboard() {
   )
 
   function handleLogOut() {
-    return Alert.alert('Sair da aplicação', 'Tem certeza que deseja sair?')
+    Alert.alert('Atenção!', 'Tem certeza que deseja sair?', [
+      {
+        text: 'Cancelar',
+        style: 'cancel'
+      },
+      { text: 'OK', onPress: async () => await SignOut() }
+    ])
   }
 
   return (
@@ -182,11 +189,11 @@ export function Dashboard() {
           <Header>
             <UserWrapper>
               <UserInfo>
-                <Photo source={{ uri: profilePic.url }} resizeMode="cover" />
+                <Photo source={{ uri: user.picture }} resizeMode="cover" />
 
                 <User>
                   <UserGreenting>Olá,</UserGreenting>
-                  <UserName>Ivan</UserName>
+                  <UserName>{user.given_name}</UserName>
                 </User>
               </UserInfo>
 
